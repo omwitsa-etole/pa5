@@ -5,6 +5,43 @@
 
 /* Markers used to bound trace regions of interest */
 volatile char MARKER_START, MARKER_END;
+unsigned char Block = 16;
+void transpose(int *a,int *b,int n){
+	for ( size_t i=0; i<n; i++ ) {
+		
+		for ( size_t j=0; j<n; j++ ) {
+			
+			b[ j*n + i ] = a[ i*n + j ];
+			
+		}
+		
+	}
+}
+void blockTranspose(int *A,int *B,int n){
+	    if (n<=32) { // base case
+        for ( size_t i=0; i<n; i++ ) {
+            for ( size_t j=0; j<n; j++ ) {
+                B[ (j)*n + i ] = A[ (i)*n + j ];
+            }
+        }
+    } else { // recursive case
+        //recursiveMatTrans ( global_n, n>>1, A, offset_row_A,        offset_col_A,        B, offset_row_B,        offset_col_B        );
+        for ( size_t i=0; i<n; i+=Block ) {
+		
+		for ( size_t j=0; j<n; j+=Block ) {
+			for(size_t ii=i;ii<i+Block;ii++){
+				for(size_t jj=j;jj<j+Block;jj++){
+					//int temp = a[ i*n + j ];
+					//a[ i*n + j ] = b[ j*n + i ];
+					B[ jj*n + ii ] = A[ ii*n + jj ];
+				}
+			}
+			
+		}
+		
+	}
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -36,14 +73,11 @@ int main(int argc, char* argv[])
         fscanf(matrix_a_fp, "\n");
     }
     fclose(matrix_a_fp);
-
+    
     int* b = calloc( n*n, sizeof(int) );
     MARKER_START = 211;
-    for ( size_t i=0; i<n; i++ ) {
-        for ( size_t j=0; j<n; j++ ) {
-            b[ j*n + i ] = a[ i*n + j ];
-        }
-    }
+    //transpose(a,b,n);
+    blockTranspose(a,b,n);
     MARKER_END = 211;
 
     for ( size_t i=0; i<n; i++ ) {

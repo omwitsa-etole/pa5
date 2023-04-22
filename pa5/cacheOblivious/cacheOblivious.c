@@ -6,6 +6,8 @@
 /* Markers used to bound trace regions of interest */
 volatile char MARKER_START, MARKER_END;
 
+unsigned char Block=16;
+
 // Cache oblivious matrix transpose
 // https://en.wikipedia.org/wiki/Cache-oblivious_algorithm
 void recursiveMatTrans (
@@ -18,14 +20,25 @@ void recursiveMatTrans (
     if (n<=32) { // base case
         for ( size_t i=0; i<n; i++ ) {
             for ( size_t j=0; j<n; j++ ) {
-                B[ (offset_row_B+j)*global_n + offset_col_B+i ] = A[ (offset_row_A+i)*global_n + offset_col_A+j ];
+                B[ (j)*n + i ] = A[ (i)*n + j ];
             }
         }
     } else { // recursive case
-        recursiveMatTrans ( global_n, n>>1, A, offset_row_A,        offset_col_A,        B, offset_row_B,        offset_col_B        );
-        /* ... */
-        /* ... */
-        /* ... */
+        //recursiveMatTrans ( global_n, n>>1, A, offset_row_A,        offset_col_A,        B, offset_row_B,        offset_col_B        );
+        for ( size_t i=0; i<n; i+=Block ) {
+		
+		for ( size_t j=0; j<n; j+=Block ) {
+			for(size_t ii=i;ii<i+Block;ii++){
+				for(size_t jj=j;jj<j+Block;jj++){
+					//int temp = a[ i*n + j ];
+					//a[ i*n + j ] = b[ j*n + i ];
+					B[ jj*n + ii ] = A[ ii*n + jj ];
+				}
+			}
+			
+		}
+		
+	}
     }
 }
 

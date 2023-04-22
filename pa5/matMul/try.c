@@ -3,13 +3,38 @@
 #include <stdio.h>
 #include <assert.h>
 
-/* Markers used to bound trace regions of interest */
 volatile char MARKER_START, MARKER_END;
 
-int main(int argc, char* argv[])
-{
+int B = 4;
+int cache_size = 16;
 
-    /* Record marker addresses */
+
+void blockMultiply(int *a,int* b,int* c, int n){
+	//int first = (n/16) + n;
+	
+	int i,j,k,ii,jj,kk;
+	for(i=0;i<n;i+=B){
+		for(j=0;j<n;j+=B){
+			
+			for(ii=i;ii<i+B;ii++){
+				for(jj=j;jj<j+B;jj++){
+					c[ii*n+jj] = 0;
+					for(k=0;k<n;k++){
+						c[ii*n+jj] += a[ii*n+k]*b[k*n+jj];	
+					}
+				//x[i*n]
+				}
+			}		
+			
+		}
+	}
+	//int totalmisses = first*(n*n);
+	//printf("total: misses: %d\n",totalmisses);
+
+}
+
+int main(int argc, char* argv[]){
+	 /* Record marker addresses */
     FILE* marker_fp = fopen(".marker","w");
     assert(marker_fp);
     fprintf(marker_fp, "%llx\n%llx",
@@ -60,50 +85,21 @@ int main(int argc, char* argv[])
     fclose(matrix_b_fp);
 
     int* c = calloc( n*n, sizeof(int) );
-    MARKER_START = 211;
-
-    // kij
-    for ( size_t k=0; k<n; k++ ) {
-        for ( size_t i=0; i<n; i++ ) {
-            int r = a[i*n+k];
-            for ( size_t j=0; j<n; j++ ) {
-                c[i*n+j] += r * b[k*n+j];
-            }
-        }
-    }
-
-    // ijk
-    // for ( size_t i=0; i<n; i++ ) {
-    //     for ( size_t j=0; j<n; j++ ) {
-    //         int sum = c[i*n+j];
-    //         for ( size_t k=0; k<n; k++ ) {
-    //             sum += a[i*n+k] * b[k*n+j];
-    //         }
-    //         c[i*n+j] = sum;
-    //     }
-    // }
-
-    // jki
-    // for ( size_t j=0; j<n; j++ ) {
-    //     for ( size_t k=0; k<n; k++ ) {
-    //         int r = b[k*n+j];
-    //         for ( size_t i=0; i<n; i++ ) {
-    //             c[i*n+j] += a[i*n+k] * r;
-    //         }
-    //     }
-    // }
-    MARKER_END = 211;
-
-    for ( size_t i=0; i<n; i++ ) {
-        for ( size_t j=0; j<n; j++ ) {
-            printf( "%d ", c[i*n+j] );
-        }
-        printf( "\n" );
-    }
-
-    free(c);
-    free(b);
-    free(a);
-    exit(EXIT_SUCCESS);
-
+	MARKER_START = 211;
+	blockMultiply(a,b,c,n);
+	MARKER_END = 211;
+	
+	for ( size_t i=0; i<n; i++ ) {
+		for ( size_t k=0; k<n; k++ ) {
+			printf("%d ", c[i*n+k]);
+		}
+		printf("\n");
+	}
+	free(c);
+	free(b);
+	free(a);
+	exit(EXIT_SUCCESS);
+	
 }
+
+

@@ -1,14 +1,14 @@
 OUTPUT=cacheBlocking
 CFLAGS=-Wall -Werror -m64
 # -fsanitize=address
+SOURCES = cacheBlocking.0
 
-%: %.c %.h
-	gcc $(CFLAGS) -O0 -o $@ $<
+TARGET = cacheBlocking
+CC = gcc
 
-%: %.c
-	gcc $(CFLAGS) -O0 -o $@ $<
 
-all: $(OUTPUT)
+all: $(SOURCES) $(TARGET)
+    $(CC) $(SOURCES) -O0 -o $(TARGET) 
 
 clean:
-	rm -f *.o $(OUTPUT)
+	rm -rf $(TARGET) 
